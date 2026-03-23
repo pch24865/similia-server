@@ -80,24 +80,28 @@
 
 <script>
     async function signUp() {
-        const data = {
-            email: document.getElementById('email').value,
-            nickname: document.getElementById('nickname').value,
-            name: document.getElementById('name').value,
-            password: password,
-            phone: document.getElementById('phone').value
-        };
-
-
         const resultDiv = document.getElementById('result');
+
+        const email = document.getElementById('email').value;
+        const nickname = document.getElementById('nickname').value;
+        const name = document.getElementById('name').value;
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
+        const phone = document.getElementById('phone').value;
 
         if (password !== confirmPassword) {
             resultDiv.style.display = 'block';
             resultDiv.innerText = '비밀번호와 비밀번호 확인이 일치하지 않습니다.';
             return;
         }
+
+        const data = {
+            email: email,
+            nickname: nickname,
+            name: name,
+            password: password,
+            phone: phone
+        };
 
         try {
             const response = await fetch('/members/signup', {
@@ -124,7 +128,6 @@
             resultDiv.style.display = 'block';
             resultDiv.innerText = '오류 발생\n\n' + error;
         }
-
     }
 </script>
 </body>

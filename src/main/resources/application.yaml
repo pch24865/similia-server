@@ -1,3 +1,20 @@
 spring:
   application:
     name: similia
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/similia
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update   # 처음엔 update 추천
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8080

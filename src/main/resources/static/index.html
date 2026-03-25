@@ -122,7 +122,7 @@
 
     async function checkLoginStatus() {
         try {
-            const response = await fetch('/members/me', {
+            const response = await fetch('/members/profile', {
                 method: 'GET',
                 credentials: 'include'
             });
@@ -168,8 +168,8 @@
 
     async function logout() {
         try {
-            const response = await fetch('/members/logout', {
-                method: 'POST',
+            const response = await fetch('/sessions', {
+                method: 'DELETE',
                 credentials: 'include'
             });
 

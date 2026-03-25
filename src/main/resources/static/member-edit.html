@@ -70,7 +70,6 @@
         .danger {
             background: #e74c3c;
         }
-
         .danger:hover {
             background: #c0392b;
         }
@@ -87,6 +86,9 @@
     <input type="text" id="nickname" placeholder="닉네임">
     <input type="text" id="name" placeholder="이름">
     <input type="text" id="phone" placeholder="전화번호">
+
+    <button onclick="updateMyInfo()">회원정보 수정</button>
+
     <hr style="margin: 24px 0;">
 
     <h3 style="margin-bottom: 14px;">비밀번호 변경</h3>
@@ -97,10 +99,8 @@
 
     <button onclick="changePassword()">비밀번호 변경</button>
 
-    <button onclick="updateMyInfo()">회원정보 수정</button>
     <button class="danger" onclick="deleteMyAccount()">회원탈퇴</button>
     <button class="gray" onclick="logout()">로그아웃</button>
-
     <button class="gray" onclick="location.href='/index.html'">홈페이지로 가기</button>
 
     <div id="result" class="message" style="display:none;"></div>
@@ -116,7 +116,7 @@
         const memberInfoDiv = document.getElementById('memberInfo');
 
         try {
-            const response = await fetch('/members/me', {
+            const response = await fetch('/members/profile', {
                 method: 'GET',
                 credentials: 'include'
             });
@@ -128,7 +128,8 @@
 
                 memberInfoDiv.innerHTML =
                     '이메일: ' + json.email + '<br>' +
-                    '가입일: ' + (json.createdAt ?? '-');
+                    '가입일: ' + (json.createdAt ?? '-') + '<br>' +
+                    '수정일: ' + (json.updatedAt ?? '-');
 
                 document.getElementById('nickname').value = json.nickname || '';
                 document.getElementById('name').value = json.name || '';
@@ -149,17 +150,17 @@
     }
 
     async function updateMyInfo() {
+        const resultDiv = document.getElementById('result');
+
         const data = {
             nickname: document.getElementById('nickname').value,
             name: document.getElementById('name').value,
             phone: document.getElementById('phone').value
         };
 
-        const resultDiv = document.getElementById('result');
-
         try {
-            const response = await fetch('/members/me', {
-                method: 'PUT',
+            const response = await fetch('/members/profile', {
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -182,6 +183,7 @@
             resultDiv.innerText = '오류 발생\n\n' + error;
         }
     }
+
     async function changePassword() {
         const resultDiv = document.getElementById('result');
 
@@ -202,8 +204,8 @@
         };
 
         try {
-            const response = await fetch('/members/me/password', {
-                method: 'PUT',
+            const response = await fetch('/members/password', {
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -229,12 +231,13 @@
             resultDiv.innerText = '오류 발생\n\n' + error;
         }
     }
+
     async function logout() {
         const resultDiv = document.getElementById('result');
 
         try {
-            const response = await fetch('/members/logout', {
-                method: 'POST',
+            const response = await fetch('/sessions', {
+                method: 'DELETE',
                 credentials: 'include'
             });
 
@@ -256,53 +259,6 @@
         }
     }
 
-    async function changePassword() {
-        const resultDiv = document.getElementById('result');
-
-        const currentPassword = document.getElementById('currentPassword').value;
-        const newPassword = document.getElementById('newPassword').value;
-        const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-
-        if (newPassword !== confirmNewPassword) {
-            resultDiv.style.display = 'block';
-            resultDiv.innerText = '새 비밀번호와 비밀번호 확인이 일치하지 않습니다.';
-            return;
-        }
-
-        const data = {
-            currentPassword: currentPassword,
-            newPassword: newPassword,
-            confirmNewPassword: confirmNewPassword
-        };
-
-        try {
-            const response = await fetch('/members/me/password', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify(data)
-            });
-
-            const text = await response.text();
-
-            resultDiv.style.display = 'block';
-
-            if (response.ok) {
-                resultDiv.innerText = text;
-
-                document.getElementById('currentPassword').value = '';
-                document.getElementById('newPassword').value = '';
-                document.getElementById('confirmNewPassword').value = '';
-            } else {
-                resultDiv.innerText = '비밀번호 변경 실패\n\n' + text;
-            }
-        } catch (error) {
-            resultDiv.style.display = 'block';
-            resultDiv.innerText = '오류 발생\n\n' + error;
-        }
-    }
     async function deleteMyAccount() {
         const resultDiv = document.getElementById('result');
 
@@ -312,7 +268,7 @@
         }
 
         try {
-            const response = await fetch('/members/me', {
+            const response = await fetch('/members/profile', {
                 method: 'DELETE',
                 credentials: 'include'
             });

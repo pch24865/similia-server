@@ -1,4 +1,4 @@
-package com.noplay.similia.config;
+package com.noplay.similia.core.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

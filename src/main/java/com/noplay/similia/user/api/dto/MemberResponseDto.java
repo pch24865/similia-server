@@ -1,6 +1,6 @@
-package com.noplay.similia.dto;
+package com.noplay.similia.user.api.dto;
 
-import com.noplay.similia.domain.Member;
+import com.noplay.similia.user.domain.Member;
 import lombok.Builder;
 import lombok.Getter;
 

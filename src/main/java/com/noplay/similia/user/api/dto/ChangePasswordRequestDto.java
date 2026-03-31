@@ -1,4 +1,4 @@
-package com.noplay.similia.dto;
+package com.noplay.similia.user.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

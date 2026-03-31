@@ -1,8 +1,8 @@
-package com.noplay.similia.controller;
+package com.noplay.similia.user.api;
 
-import com.noplay.similia.dto.LoginRequestDto;
-import com.noplay.similia.dto.MemberResponseDto;
-import com.noplay.similia.service.MemberService;
+import com.noplay.similia.user.api.dto.LoginRequestDto;
+import com.noplay.similia.user.api.dto.MemberResponseDto;
+import com.noplay.similia.user.application.MemberService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

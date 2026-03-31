@@ -1,4 +1,4 @@
-package com.noplay.similia.domain;
+package com.noplay.similia.user.domain;
 
 import jakarta.persistence.*;
 import lombok.*;

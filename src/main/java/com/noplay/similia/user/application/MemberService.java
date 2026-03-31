@@ -1,8 +1,8 @@
-package com.noplay.similia.service;
+package com.noplay.similia.user.application;
 
-import com.noplay.similia.domain.Member;
-import com.noplay.similia.dto.*;
-import com.noplay.similia.repository.MemberRepository;
+import com.noplay.similia.user.domain.Member;
+import com.noplay.similia.user.infrastructure.MemberRepository;
+import com.noplay.similia.user.api.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

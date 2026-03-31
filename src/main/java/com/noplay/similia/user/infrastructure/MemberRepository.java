@@ -1,6 +1,6 @@
-package com.noplay.similia.repository;
+package com.noplay.similia.user.infrastructure;
 
-import com.noplay.similia.domain.Member;
+import com.noplay.similia.user.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

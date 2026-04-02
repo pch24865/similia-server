@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>회원정보수정</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 420px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .info-box {
+            margin-bottom: 18px;
+            padding: 12px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: #2d7ef7;
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #1f68d6;
+        }
+        .gray {
+            background: #666;
+        }
+        .gray:hover {
+            background: #444;
+        }
+        .message {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #eef4ff;
+            white-space: pre-line;
+        }
+        .danger {
+            background: #e74c3c;
+        }
+        .danger:hover {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>회원정보수정</h2>
+
+    <div class="info-box" id="memberInfo">
+        로그인한 사용자 정보를 불러오는 중...
+    </div>
+
+    <input type="text" id="nickname" placeholder="닉네임">
+    <input type="text" id="name" placeholder="이름">
+    <input type="text" id="phone" placeholder="전화번호">
+
+    <button onclick="updateMyInfo()">회원정보 수정</button>
+
+    <hr style="margin: 24px 0;">
+
+    <h3 style="margin-bottom: 14px;">비밀번호 변경</h3>
+
+    <input type="password" id="currentPassword" placeholder="현재 비밀번호">
+    <input type="password" id="newPassword" placeholder="새 비밀번호">
+    <input type="password" id="confirmNewPassword" placeholder="새 비밀번호 확인">
+
+    <button onclick="changePassword()">비밀번호 변경</button>
+
+    <button class="danger" onclick="deleteMyAccount()">회원탈퇴</button>
+    <button class="gray" onclick="logout()">로그아웃</button>
+    <button class="gray" onclick="location.href='/index.html'">홈페이지로 가기</button>
+
+    <div id="result" class="message" style="display:none;"></div>
+</div>
+
+<script>
+    window.onload = function () {
+        loadMyInfo();
+    };
+
+    async function loadMyInfo() {
+        const resultDiv = document.getElementById('result');
+        const memberInfoDiv = document.getElementById('memberInfo');
+
+        try {
+            const response = await fetch('/members/profile', {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            const text = await response.text();
+
+            if (response.ok) {
+                const json = JSON.parse(text);
+
+                memberInfoDiv.innerHTML =
+                    '이메일: ' + json.email + '<br>' +
+                    '가입일: ' + (json.createdAt ?? '-') + '<br>' +
+                    '수정일: ' + (json.updatedAt ?? '-');
+
+                document.getElementById('nickname').value = json.nickname || '';
+                document.getElementById('name').value = json.name || '';
+                document.getElementById('phone').value = json.phone || '';
+
+                resultDiv.style.display = 'block';
+                resultDiv.innerText = '내 정보 조회 성공';
+            } else {
+                memberInfoDiv.innerHTML = '로그인이 필요합니다.';
+                resultDiv.style.display = 'block';
+                resultDiv.innerText = '내 정보 조회 실패\n\n' + text;
+            }
+        } catch (error) {
+            memberInfoDiv.innerHTML = '오류가 발생했습니다.';
+            resultDiv.style.display = 'block';
+            resultDiv.innerText = '오류 발생\n\n' + error;
+        }
+    }
+
+    async function updateMyInfo() {
+        const resultDiv = document.getElementById('result');
+
+        const data = {
+            nickname: document.getElementById('nickname').value,
+            name: document.getElementById('name').value,
+            phone: document.getElementById('phone').value
+        };
+
+        try {
+            const response = await fetch('/members/profile', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(data)
+            });
+
+            const text = await response.text();
+
+            resultDiv.style.display = 'block';
+
+            if (response.ok) {
+                resultDiv.innerText = '회원정보 수정 성공';
+                loadMyInfo();
+            } else {
+                resultDiv.innerText = '회원정보 수정 실패\n\n' + text;
+            }
+        } catch (error) {
+            resultDiv.style.display = 'block';
+            resultDiv.innerText = '오류 발생\n\n' + error;
+        }
+    }
+
+    async function changePassword() {
+        const resultDiv = document.getElementById('result');
+
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+        if (newPassword !== confirmNewPassword) {
+            resultDiv.style.display = 'block';
+            resultDiv.innerText = '새 비밀번호와 비밀번호 확인이 일치하지 않습니다.';
+            return;
+        }
+
+        const data = {
+            currentPassword: currentPassword,
+            newPassword: newPassword,
+            confirmNewPassword: confirmNewPassword
+        };
+
+        try {
+            const response = await fetch('/members/password', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(data)
+            });
+
+            const text = await response.text();
+
+            resultDiv.style.display = 'block';
+
+            if (response.ok) {
+                resultDiv.innerText = text;
+
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmNewPassword').value = '';
+            } else {
+                resultDiv.innerText = '비밀번호 변경 실패\n\n' + text;
+            }
+        } catch (error) {
+            resultDiv.style.display = 'block';
+            resultDiv.innerText = '오류 발생\n\n' + error;
+        }
+    }
+
+    async function logout() {
+        const resultDiv = document.getElementById('result');
+
+        try {
+            const response = await fetch('/sessions', {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            const text = await response.text();
+
+            resultDiv.style.display = 'block';
+
+            if (response.ok) {
+                resultDiv.innerText = text;
+                setTimeout(() => {
+                    location.href = '/index.html';
+                }, 500);
+            } else {
+                resultDiv.innerText = '로그아웃 실패\n\n' + text;
+            }
+        } catch (error) {
+            resultDiv.style.display = 'block';
+            resultDiv.innerText = '오류 발생\n\n' + error;
+        }
+    }
+
+    async function deleteMyAccount() {
+        const resultDiv = document.getElementById('result');
+
+        const confirmed = confirm('정말 회원탈퇴 하시겠습니까? 탈퇴 후에는 되돌릴 수 없습니다.');
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/members/profile', {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            const text = await response.text();
+
+            if (response.ok) {
+                alert(text);
+                location.href = '/index.html';
+            } else {
+                resultDiv.style.display = 'block';
+                resultDiv.innerText = '회원탈퇴 실패\n\n' + text;
+            }
+        } catch (error) {
+            resultDiv.style.display = 'block';
+            resultDiv.innerText = '오류 발생\n\n' + error;
+        }
+    }
+</script>
+</body>
+</html>

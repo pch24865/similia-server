@@ -63,9 +63,9 @@
     <h2>회원가입</h2>
 
     <input type="email" id="email" placeholder="이메일">
-    <input type="text" id="nickname" placeholder="닉네임">
-    <input type="text" id="name" placeholder="이름">
-    <input type="password" id="password" placeholder="비밀번호">
+    <input type="text" id="nickname" placeholder="닉네임 (2자 이상)">
+    <input type="text" id="name" placeholder="이름 (2자 이상)">
+    <input type="password" id="password" placeholder="비밀번호 (영문, 숫자, 특수문자 포함 8자 이상 20자 이하)">
     <input type="password" id="confirmPassword" placeholder="비밀번호 확인">
     <input type="text" id="phone" placeholder="전화번호 (예: 010-1234-5678)">
 
@@ -100,6 +100,7 @@
             nickname: nickname,
             name: name,
             password: password,
+            confirmPassword: confirmPassword, // DTO 검증용 확인 패스워드 추가 (서버에서 필수값으로 요구함)
             phone: phone
         };
 

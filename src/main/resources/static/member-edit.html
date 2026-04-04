@@ -83,9 +83,9 @@
         로그인한 사용자 정보를 불러오는 중...
     </div>
 
-    <input type="text" id="nickname" placeholder="닉네임">
-    <input type="text" id="name" placeholder="이름">
-    <input type="text" id="phone" placeholder="전화번호">
+    <input type="text" id="nickname" placeholder="닉네임 (2자 이상 20자 이하)">
+    <input type="text" id="name" placeholder="이름 (2자 이상 50자 이하)">
+    <input type="text" id="phone" placeholder="전화번호 (예: 010-1234-5678)">
 
     <button onclick="updateMyInfo()">회원정보 수정</button>
 
@@ -94,7 +94,7 @@
     <h3 style="margin-bottom: 14px;">비밀번호 변경</h3>
 
     <input type="password" id="currentPassword" placeholder="현재 비밀번호">
-    <input type="password" id="newPassword" placeholder="새 비밀번호">
+    <input type="password" id="newPassword" placeholder="새 비밀번호 (영문, 숫자, 특수문자 포함 8자 이상)">
     <input type="password" id="confirmNewPassword" placeholder="새 비밀번호 확인">
 
     <button onclick="changePassword()">비밀번호 변경</button>
@@ -115,9 +115,18 @@
         const resultDiv = document.getElementById('result');
         const memberInfoDiv = document.getElementById('memberInfo');
 
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            memberInfoDiv.innerHTML = '로그인이 필요합니다.';
+            return;
+        }
+
         try {
             const response = await fetch('/members/profile', {
                 method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 credentials: 'include'
             });
 
@@ -158,11 +167,13 @@
             phone: document.getElementById('phone').value
         };
 
+        const token = localStorage.getItem('accessToken');
         try {
             const response = await fetch('/members/profile', {
                 method: 'PATCH',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
                 },
                 credentials: 'include',
                 body: JSON.stringify(data)
@@ -203,11 +214,13 @@
             confirmNewPassword: confirmNewPassword
         };
 
+        const token = localStorage.getItem('accessToken');
         try {
             const response = await fetch('/members/password', {
                 method: 'PATCH',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
                 },
                 credentials: 'include',
                 body: JSON.stringify(data)
@@ -234,10 +247,14 @@
 
     async function logout() {
         const resultDiv = document.getElementById('result');
+        const token = localStorage.getItem('accessToken');
 
         try {
-            const response = await fetch('/sessions', {
+            const response = await fetch('/auth/tokens', {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 credentials: 'include'
             });
 
@@ -246,6 +263,7 @@
             resultDiv.style.display = 'block';
 
             if (response.ok) {
+                localStorage.removeItem('accessToken');
                 resultDiv.innerText = text;
                 setTimeout(() => {
                     location.href = '/index.html';
@@ -267,15 +285,20 @@
             return;
         }
 
+        const token = localStorage.getItem('accessToken');
         try {
             const response = await fetch('/members/profile', {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 credentials: 'include'
             });
 
             const text = await response.text();
 
             if (response.ok) {
+                localStorage.removeItem('accessToken');
                 alert(text);
                 location.href = '/index.html';
             } else {

@@ -84,7 +84,7 @@
         const resultDiv = document.getElementById('result');
 
         try {
-            const response = await fetch('/sessions', {
+            const response = await fetch('/auth/tokens', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -93,16 +93,18 @@
                 body: JSON.stringify(data)
             });
 
-            const text = await response.text();
-
             resultDiv.style.display = 'block';
 
             if (response.ok) {
+                const json = await response.json();
+                localStorage.setItem('accessToken', json.accessToken); // JWT 저장
+                
                 resultDiv.innerText = '로그인 성공';
                 setTimeout(() => {
                     location.href = '/index.html';
                 }, 500);
             } else {
+                const text = await response.text();
                 resultDiv.innerText = '로그인 실패\n\n' + text;
             }
         } catch (error) {

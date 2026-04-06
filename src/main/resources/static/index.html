@@ -121,9 +121,18 @@
     };
 
     async function checkLoginStatus() {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            renderLoggedOutNav();
+            return;
+        }
+
         try {
             const response = await fetch('/members/profile', {
                 method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 credentials: 'include'
             });
 
@@ -168,12 +177,17 @@
 
     async function logout() {
         try {
-            const response = await fetch('/sessions', {
+            const token = localStorage.getItem('accessToken');
+            const response = await fetch('/auth/tokens', {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 credentials: 'include'
             });
 
             if (response.ok) {
+                localStorage.removeItem('accessToken');
                 location.href = '/index.html';
             } else {
                 alert('로그아웃에 실패했습니다.');

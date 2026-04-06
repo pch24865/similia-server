@@ -5,11 +5,13 @@ import com.noplay.similia.user.api.dto.MemberResponseDto;
 import com.noplay.similia.user.api.dto.SignUpRequestDto;
 import com.noplay.similia.user.api.dto.UpdateMemberRequestDto;
 import com.noplay.similia.user.application.MemberService;
-import jakarta.servlet.http.HttpSession;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Member", description = "회원 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members")
@@ -25,8 +27,8 @@ public class MemberController {
 
     // 내 정보 조회
     @GetMapping("/profile")
-    public MemberResponseDto getMyProfile(HttpSession session) {
-        Long loginMemberId = getLoginMemberId(session);
+    public MemberResponseDto getMyProfile(@AuthenticationPrincipal String memberId) {
+        Long loginMemberId = parseMemberId(memberId);
         return memberService.getMember(loginMemberId);
     }
 
@@ -34,9 +36,9 @@ public class MemberController {
     @PatchMapping("/profile")
     public MemberResponseDto updateMyProfile(
             @Valid @RequestBody UpdateMemberRequestDto dto,
-            HttpSession session
+            @AuthenticationPrincipal String memberId
     ) {
-        Long loginMemberId = getLoginMemberId(session);
+        Long loginMemberId = parseMemberId(memberId);
         return memberService.update(loginMemberId, dto);
     }
 
@@ -44,27 +46,25 @@ public class MemberController {
     @PatchMapping("/password")
     public String changePassword(
             @Valid @RequestBody ChangePasswordRequestDto dto,
-            HttpSession session
+            @AuthenticationPrincipal String memberId
     ) {
-        Long loginMemberId = getLoginMemberId(session);
+        Long loginMemberId = parseMemberId(memberId);
         memberService.changePassword(loginMemberId, dto);
         return "비밀번호가 변경되었습니다.";
     }
 
     // 회원탈퇴
     @DeleteMapping("/profile")
-    public String deleteMyProfile(HttpSession session) {
-        Long loginMemberId = getLoginMemberId(session);
+    public String deleteMyProfile(@AuthenticationPrincipal String memberId) {
+        Long loginMemberId = parseMemberId(memberId);
         memberService.deleteMember(loginMemberId);
-        session.invalidate();
         return "회원탈퇴가 완료되었습니다.";
     }
 
-    private Long getLoginMemberId(HttpSession session) {
-        Long loginMemberId = (Long) session.getAttribute("loginMemberId");
-        if (loginMemberId == null) {
+    private Long parseMemberId(String memberId) {
+        if (memberId == null) {
             throw new IllegalArgumentException("로그인이 필요합니다.");
         }
-        return loginMemberId;
+        return Long.parseLong(memberId);
     }
 }

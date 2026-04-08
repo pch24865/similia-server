@@ -1,5 +1,7 @@
 package com.noplay.similia.user.application;
 
+import com.noplay.similia.global.exception.BusinessException;
+import com.noplay.similia.global.exception.ErrorCode;
 import com.noplay.similia.global.security.JwtProvider;
 import com.noplay.similia.user.api.dto.LoginRequestDto;
 import com.noplay.similia.user.api.dto.TokenResponseDto;
@@ -26,10 +28,10 @@ public class AuthService {
     @Transactional
     public TokenResponseDto login(LoginRequestDto dto) {
         Member member = memberRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
 
         if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+            throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         String accessToken = jwtProvider.createAccessToken(member.getId());
@@ -43,7 +45,7 @@ public class AuthService {
                         .token(refreshTokenString)
                         .expiryDate(expiryDate)
                         .build());
-        
+
         refreshToken.updateToken(refreshTokenString, expiryDate);
         refreshTokenRepository.save(refreshToken);
 

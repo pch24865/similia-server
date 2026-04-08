@@ -1,5 +1,7 @@
 package com.noplay.similia.user.application;
 
+import com.noplay.similia.global.exception.BusinessException;
+import com.noplay.similia.global.exception.ErrorCode;
 import com.noplay.similia.user.domain.Member;
 import com.noplay.similia.user.infrastructure.MemberRepository;
 import com.noplay.similia.user.api.dto.*;
@@ -19,7 +21,7 @@ public class MemberService {
     @Transactional
     public MemberResponseDto signUp(SignUpRequestDto dto) {
         if (memberRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+            throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
         }
 
         Member member = Member.builder()
@@ -35,10 +37,10 @@ public class MemberService {
 
     public MemberResponseDto login(LoginRequestDto dto) {
         Member member = memberRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
 
         if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+            throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         return MemberResponseDto.from(member);
@@ -46,7 +48,7 @@ public class MemberService {
 
     public MemberResponseDto getMember(Long id) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
         return MemberResponseDto.from(member);
     }
@@ -54,7 +56,7 @@ public class MemberService {
     @Transactional
     public MemberResponseDto update(Long id, UpdateMemberRequestDto dto) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
         member.update(dto.getNickname(), dto.getName(), dto.getPhone());
 
@@ -64,14 +66,14 @@ public class MemberService {
     @Transactional
     public void changePassword(Long memberId, ChangePasswordRequestDto dto) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
         if (!passwordEncoder.matches(dto.getCurrentPassword(), member.getPassword())) {
-            throw new IllegalArgumentException("현재 비밀번호가 올바르지 않습니다.");
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
 
         if (!dto.getNewPassword().equals(dto.getConfirmNewPassword())) {
-            throw new IllegalArgumentException("새 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
 
         member.changePassword(passwordEncoder.encode(dto.getNewPassword()));
@@ -80,7 +82,7 @@ public class MemberService {
     @Transactional
     public void deleteMember(Long id) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_INPUT_VALUE));
 
         memberRepository.delete(member);
     }

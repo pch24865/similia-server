@@ -19,6 +19,6 @@ public enum ErrorCode {
     MEMBER_NOT_FOUND(404, "회원을 찾을 수 없습니다."),
     ;
 
-    private int code;
-    private String message;
+    private final int code;
+    private final String message;
 }

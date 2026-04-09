@@ -14,6 +14,7 @@ public enum ErrorCode {
     DUPLICATE_EMAIL(409, "이미 존재하는 이메일입니다."),
     DUPLICATE_NICKNAME(409, "이미 존재하는 닉네임입니다."),
     INVALID_CREDENTIALS(401, "이메일 또는 비밀번호가 올바르지 않습니다."),
+    INVALID_TOKEN(401, "로그인이 만료되었습니다. 다시 로그인해주세요."),
 
     // --- 회원 정보 ---
     MEMBER_NOT_FOUND(404, "회원을 찾을 수 없습니다."),

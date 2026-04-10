@@ -1,5 +1,7 @@
 package com.noplay.similia.user.application;
 
+import com.noplay.similia.global.exception.BusinessException;
+import com.noplay.similia.global.exception.ErrorCode;
 import com.noplay.similia.global.security.JwtProvider;
 import com.noplay.similia.user.api.dto.LoginRequestDto;
 import com.noplay.similia.user.api.dto.TokenResponseDto;
@@ -26,10 +28,10 @@ public class AuthService {
     @Transactional
     public TokenResponseDto login(LoginRequestDto dto) {
         Member member = memberRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
 
         if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+            throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         String accessToken = jwtProvider.createAccessToken(member.getId());
@@ -43,7 +45,7 @@ public class AuthService {
                         .token(refreshTokenString)
                         .expiryDate(expiryDate)
                         .build());
-        
+
         refreshToken.updateToken(refreshTokenString, expiryDate);
         refreshTokenRepository.save(refreshToken);
 
@@ -53,5 +55,35 @@ public class AuthService {
     @Transactional
     public void logout(Long memberId) {
         refreshTokenRepository.deleteByMemberId(memberId);
+    }
+
+    @Transactional
+    public TokenResponseDto reissue(String refreshTokenString) {
+        // 1. 전달받은 Refresh Token의 유효성 검증
+        if (!jwtProvider.validateToken(refreshTokenString)) {
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+        }
+
+        // 2. 토큰에서 memberId 추출 (JwtProvider에서 Authentication 객체 생성 시 memberId가 Principal로 들어감)
+        String memberIdStr = jwtProvider.getAuthentication(refreshTokenString).getName();
+        Long memberId = Long.parseLong(memberIdStr);
+
+        // 3. DB에 저장된 Refresh Token과 일치하는지 확인
+        RefreshToken refreshToken = refreshTokenRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_TOKEN));
+
+        if (!refreshToken.getToken().equals(refreshTokenString)) {
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+        }
+
+        // 4. 새로운 토큰 생성
+        String newAccessToken = jwtProvider.createAccessToken(memberId);
+        String newRefreshTokenString = jwtProvider.createRefreshToken(memberId);
+
+        // 5. DB 업데이트
+        LocalDateTime expiryDate = LocalDateTime.now().plusDays(7);
+        refreshToken.updateToken(newRefreshTokenString, expiryDate);
+
+        return new TokenResponseDto(newAccessToken, newRefreshTokenString);
     }
 }

@@ -1,5 +1,7 @@
 package com.noplay.similia.user.api;
 
+import com.noplay.similia.global.exception.BusinessException;
+import com.noplay.similia.global.exception.ErrorCode;
 import com.noplay.similia.user.api.dto.LoginRequestDto;
 import com.noplay.similia.user.api.dto.TokenResponseDto;
 import com.noplay.similia.user.application.AuthService;
@@ -40,6 +42,29 @@ public class AuthController {
         // 자원을 생성했으므로 REST 적으로는 201 Created 가 적절하지만
         // Token 통신의 관례상 200 OK 도 자주 쓰이므로 선택 가능합니다. (여기서는 201을 씁니다)
         return ResponseEntity.status(HttpStatus.CREATED).body(tokenDto);
+    }
+
+    // 토큰 갱신 = 토큰 재발급
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenResponseDto> refreshToken(
+            @CookieValue(value = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response
+    ) {
+        if (refreshToken == null) {
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+        }
+
+        TokenResponseDto tokenDto = authService.reissue(refreshToken);
+
+        // 새로운 Refresh Token 쿠키 발급
+        Cookie newRefreshTokenCookie = new Cookie("refresh_token", tokenDto.getRefreshToken());
+        newRefreshTokenCookie.setHttpOnly(true);
+        newRefreshTokenCookie.setSecure(true); // HTTPS 적용 시 활성화
+        newRefreshTokenCookie.setPath("/");
+        newRefreshTokenCookie.setMaxAge(7 * 24 * 60 * 60); // 7일
+        response.addCookie(newRefreshTokenCookie);
+
+        return ResponseEntity.ok(tokenDto);
     }
 
     // 토큰 삭제 = 로그아웃

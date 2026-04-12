@@ -102,6 +102,7 @@
     <div class="nav-right">
         <button class="nav-btn" onclick="goHome()">홈</button>
         <button class="nav-btn" id="loginBtn" onclick="goLogin()">로그인</button>
+        <button class="nav-btn hidden" id="uploadNavBtn" onclick="goUpload()">이미지 업로드</button>
         <button class="nav-btn hidden" id="editBtn" onclick="goEdit()">회원정보 수정</button>
         <button class="nav-btn hidden" id="logoutBtn" onclick="logout()">로그아웃</button>
     </div>
@@ -151,6 +152,7 @@
         document.getElementById('welcomeText').innerText = `${member.nickname}님 어서오세요!`;
 
         document.getElementById('loginBtn').classList.add('hidden');
+        document.getElementById('uploadNavBtn').classList.remove('hidden');
         document.getElementById('editBtn').classList.remove('hidden');
         document.getElementById('logoutBtn').classList.remove('hidden');
     }
@@ -159,6 +161,7 @@
         document.getElementById('welcomeText').innerText = 'Similia';
 
         document.getElementById('loginBtn').classList.remove('hidden');
+        document.getElementById('uploadNavBtn').classList.add('hidden');
         document.getElementById('editBtn').classList.add('hidden');
         document.getElementById('logoutBtn').classList.add('hidden');
     }
@@ -169,6 +172,10 @@
 
     function goLogin() {
         location.href = '/login.html';
+    }
+
+    function goUpload() {
+        location.href = '/image-upload.html';
     }
 
     function goEdit() {

@@ -39,11 +39,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 // 정적 파일 및 뷰 페이지 허용
-                                .requestMatchers("/", "/*.html", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error").permitAll()
+                                .requestMatchers("/", "/*.html", "/css/**", "/js/**", "/favicon.ico", "/error").permitAll()
                                 // H2 콘솔 허용
                                 .requestMatchers("/h2-console/**").permitAll()
-                                // API 허용
+                                // API 중 모두에게 열어둘 경로
                                 .requestMatchers("/members", "/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                // 이미지는 누구나 '조회' 가능 (HTML 등에서 보여주기 위해)
+                                .requestMatchers(org.springframework.http.HttpMethod.GET, "/images/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);

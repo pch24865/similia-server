@@ -100,6 +100,22 @@
         .submit-btn:hover {
             background: #1b63d1;
         }
+
+        .delete-btn {
+            background: #ff4d4f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: block;
+        }
+
+        .delete-btn:hover {
+            background: #d9363e;
+        }
         
         .result-box {
             margin-top: 20px;
@@ -147,6 +163,7 @@
             <pre id="jsonResult" style="font-size: 12px; background: #eee; padding: 10px;"></pre>
             <p><strong>아래는 저장된 이미지 원본입니다:</strong></p>
             <img id="previewImage" src="" alt="Uploaded Image" />
+            <button id="deleteImageBtn" class="delete-btn">이미지 삭제 (DELETE 테스트)</button>
         </div>
     </section>
 </main>
@@ -165,6 +182,8 @@
         }
         document.getElementById('logoutBtn').classList.remove('hidden');
     }
+
+    let currentUploadedImageId = null;
 
     document.getElementById('uploadForm').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -202,6 +221,9 @@
                 document.getElementById('resultContainer').classList.remove('hidden');
                 document.getElementById('jsonResult').innerText = JSON.stringify(data, null, 2);
                 
+                // 삭제 테스트를 위해 글로벌 변수에 저장
+                currentUploadedImageId = data.id;
+
                 // GET 조회 API를 이용해 방금 가져온 이미지를 img src에 곧바로 세팅 (인증 불필요하므로 그냥 세팅)
                 document.getElementById('previewImage').src = `/images/${data.id}`;
                 
@@ -216,6 +238,40 @@
         } finally {
             btn.innerText = "업로드 하기";
             btn.disabled = false;
+        }
+    });
+
+    document.getElementById('deleteImageBtn').addEventListener('click', async function() {
+        if (!currentUploadedImageId) return;
+
+        const token = localStorage.getItem('accessToken');
+        if (!confirm('정말 이 이미지를 삭제하시겠습니까? (삭제 API 테스트)')) return;
+
+        try {
+            const response = await fetch('/images/' + currentUploadedImageId, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (response.ok || response.status === 204) {
+                alert('이미지가 성공적으로 삭제되었습니다!');
+                // UI 원상 복구
+                document.getElementById('resultContainer').classList.add('hidden');
+                document.getElementById('imageFile').value = '';
+                currentUploadedImageId = null;
+            } else {
+                let errText = "삭제에 실패했습니다.";
+                try {
+                    const err = await response.json();
+                    errText = err.message;
+                } catch(e) {}
+                alert(`삭제 실패: ${errText}`);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("요청 중 오류가 발생했습니다.");
         }
     });
 

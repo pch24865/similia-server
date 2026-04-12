@@ -3,6 +3,7 @@ package com.noplay.similia.image.api;
 import com.noplay.similia.image.api.dto.ImageUploadResponseDto;
 import com.noplay.similia.image.application.ImageService;
 import com.noplay.similia.image.domain.Image;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
  * - 모든 업로드는 multipart/form-data 형식으로 요청해야 합니다.
  * - 추천용 이미지만을 다루며, 실제 AI 분석 요청은 별도의 API에서 진행됩니다.
  */
+@Tag(name = "Image", description = "이미지 업로드")
 @RestController
 @RequestMapping("/images")
 @RequiredArgsConstructor

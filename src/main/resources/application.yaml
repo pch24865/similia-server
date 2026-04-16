@@ -3,7 +3,12 @@ spring:
     name: similia
 
   profiles:
-    active: h2
+    active: postgres
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 15MB
 
 server:
   port: 8080

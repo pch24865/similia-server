@@ -18,7 +18,14 @@ public enum ErrorCode {
 
     // --- 회원 정보 ---
     MEMBER_NOT_FOUND(404, "회원을 찾을 수 없습니다."),
-    ;
+    INVALID_MEMBER_ID(400, "유효하지 않은 회원 ID입니다."),
+
+    // 이미지 업로드
+    INVALID_IMAGE_TYPE(400, "이미지 파일만 업로드할 수 있습니다."),
+    EMPTY_FILE(400, "업로드된 파일이 비어 있습니다."),
+    FILE_SIZE_EXCEEDED(400, "파일 크기 제한을 초과했습니다."),
+    IMAGE_NOT_FOUND(404, "이미지를 찾을 수 없습니다."),
+    IMAGE_UPLOAD_FAILED(500, "이미지 업로드 중 오류가 발생했습니다.");
 
     private final int code;
     private final String message;

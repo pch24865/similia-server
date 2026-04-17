@@ -9,33 +9,32 @@ import java.time.LocalDateTime;
 /**
  * [프론트엔드 참고용] 이미지 업로드 후 반환되는 응답 DTO
  * 업로드 성공 시 이 객체가 JSON 형태로 반환됩니다.
+ *
+ * [보안] 내부 순차 ID(Long)와 memberId는 노출하지 않습니다.
+ *        imageToken(UUID)을 이미지 식별자로 사용하세요.
  */
 @Getter
 @Builder
 public class ImageUploadResponseDto {
-    
-    /** 업로드된 이미지 고유 ID (식별자) -> 차후 이미지를 불러오거나 추천을 요청할 때 사용합니다. */
-    private Long id;
-    
-    /** 이미지를 업로드한 회원의 ID */
-    private Long memberId;
-    
+
+    /** 외부 공개용 이미지 식별자 (UUID) - 조회/삭제 시 이 값을 사용하세요. */
+    private String imageToken;
+
     /** 사용자가 업로드한 원본 파일명 (예: photo.png) */
     private String originalName;
-    
+
     /** 파일의 MIME 타입 (예: image/jpeg) */
     private String contentType;
-    
+
     /** 파일의 용량 (Byte 단위) */
     private Long fileSize;
-    
+
     /** 서버에 이미지가 저장(업로드)된 시각 */
     private LocalDateTime createdAt;
 
     public static ImageUploadResponseDto from(Image image) {
         return ImageUploadResponseDto.builder()
-                .id(image.getId())
-                .memberId(image.getMemberId())
+                .imageToken(image.getImageToken())
                 .originalName(image.getOriginalName())
                 .contentType(image.getContentType())
                 .fileSize(image.getFileSize())

@@ -71,18 +71,18 @@ public class ImageService {
     }
 
     @Transactional(readOnly = true)
-    public Image findById(Long imageId) {
-        return imageRepository.findById(imageId)
+    public Image findByToken(String imageToken) {
+        return imageRepository.findByImageToken(imageToken)
                 .orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND));
     }
 
     @Transactional
-    public void delete(Long memberId, Long imageId) {
+    public void delete(Long memberId, String imageToken) {
         if (memberId == null) {
             throw new BusinessException(ErrorCode.INVALID_MEMBER_ID);
         }
 
-        Image image = imageRepository.findById(imageId)
+        Image image = imageRepository.findByImageToken(imageToken)
                 .orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND));
 
         if (!image.getMemberId().equals(memberId)) {

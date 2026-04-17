@@ -1,5 +1,7 @@
 package com.noplay.similia.user.api;
 
+import com.noplay.similia.global.exception.BusinessException;
+import com.noplay.similia.global.exception.ErrorCode;
 import com.noplay.similia.user.api.dto.ChangePasswordRequestDto;
 import com.noplay.similia.user.api.dto.MemberResponseDto;
 import com.noplay.similia.user.api.dto.SignUpRequestDto;
@@ -61,9 +63,15 @@ public class MemberController {
         return "회원탈퇴가 완료되었습니다.";
     }
 
+    /**
+     * JWT에서 추출한 memberId(String)를 Long으로 변환합니다.
+     * - memberId가 null이면 토큰이 없거나 만료된 것이므로 401(INVALID_TOKEN) 반환
+     * - IllegalArgumentException 대신 BusinessException을 사용하여
+     *   GlobalExceptionHandler가 일관된 에러 형식으로 처리할 수 있게 합니다.
+     */
     private Long parseMemberId(String memberId) {
         if (memberId == null) {
-            throw new IllegalArgumentException("로그인이 필요합니다.");
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
         return Long.parseLong(memberId);
     }

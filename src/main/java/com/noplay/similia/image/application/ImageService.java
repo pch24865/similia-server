@@ -86,10 +86,7 @@ public class ImageService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND));
 
         if (!image.getMemberId().equals(memberId)) {
-            // 다른 사람의 이미지를 삭제하려고 할 때 권한 없음(403 혹은 커스텀 에러) 대신 
-            // 현재는 간단히 NOT_FOUND 처리를 하거나, INVALID_INPUT_VALUE를 사용할 수 있습니다.
-            // 더 정확히 하려면 ErrorCode.ACCESS_DENIED 등을 만드는 것이 좋습니다.
-            throw new IllegalArgumentException("본인의 이미지만 삭제할 수 있습니다.");
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
         imageRepository.delete(image);

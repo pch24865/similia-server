@@ -25,7 +25,10 @@ public enum ErrorCode {
     EMPTY_FILE(400, "업로드된 파일이 비어 있습니다."),
     FILE_SIZE_EXCEEDED(400, "파일 크기 제한을 초과했습니다."),
     IMAGE_NOT_FOUND(404, "이미지를 찾을 수 없습니다."),
-    IMAGE_UPLOAD_FAILED(500, "이미지 업로드 중 오류가 발생했습니다.");
+    IMAGE_UPLOAD_FAILED(500, "이미지 업로드 중 오류가 발생했습니다."),
+
+    // 권한
+    ACCESS_DENIED(403, "해당 작업에 대한 권한이 없습니다.");
 
     private final int code;
     private final String message;

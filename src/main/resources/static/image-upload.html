@@ -183,7 +183,7 @@
         document.getElementById('logoutBtn').classList.remove('hidden');
     }
 
-    let currentUploadedImageId = null;
+    let currentUploadedImageToken = null; // UUID 기반 식별자 (data.id 대신 data.imageToken 사용)
 
     document.getElementById('uploadForm').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -221,12 +221,20 @@
                 document.getElementById('resultContainer').classList.remove('hidden');
                 document.getElementById('jsonResult').innerText = JSON.stringify(data, null, 2);
                 
-                // 삭제 테스트를 위해 글로벌 변수에 저장
-                currentUploadedImageId = data.id;
+                // imageToken(UUID)을 글로벌 변수에 저장 (삭제 시 사용)
+                currentUploadedImageToken = data.imageToken;
 
-                // GET 조회 API를 이용해 방금 가져온 이미지를 img src에 곧바로 세팅 (인증 불필요하므로 그냥 세팅)
-                document.getElementById('previewImage').src = `/images/${data.id}`;
-                
+                // <img src="/images/..."> 방식은 JWT 헤더를 보낼 수 없어 인증 실패
+                // → fetch로 이미지 바이너리를 받아 Blob URL로 변환해서 표시
+                const imgResponse = await fetch(`/images/${data.imageToken}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (imgResponse.ok) {
+                    const blob = await imgResponse.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    document.getElementById('previewImage').src = blobUrl;
+                }
+
                 alert('업로드 성공!');
             } else {
                 const err = await response.json();
@@ -242,13 +250,14 @@
     });
 
     document.getElementById('deleteImageBtn').addEventListener('click', async function() {
-        if (!currentUploadedImageId) return;
+        if (!currentUploadedImageToken) return;
 
         const token = localStorage.getItem('accessToken');
         if (!confirm('정말 이 이미지를 삭제하시겠습니까? (삭제 API 테스트)')) return;
 
         try {
-            const response = await fetch('/images/' + currentUploadedImageId, {
+            // imageToken(UUID)으로 삭제 요청
+            const response = await fetch('/images/' + currentUploadedImageToken, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -257,10 +266,13 @@
 
             if (response.ok || response.status === 204) {
                 alert('이미지가 성공적으로 삭제되었습니다!');
-                // UI 원상 복구
+                // UI 원상 복구 및 Blob URL 메모리 해제
+                const previewImg = document.getElementById('previewImage');
+                if (previewImg.src.startsWith('blob:')) URL.revokeObjectURL(previewImg.src);
+                previewImg.src = '';
                 document.getElementById('resultContainer').classList.add('hidden');
                 document.getElementById('imageFile').value = '';
-                currentUploadedImageId = null;
+                currentUploadedImageToken = null;
             } else {
                 let errText = "삭제에 실패했습니다.";
                 try {

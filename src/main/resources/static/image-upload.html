@@ -160,6 +160,12 @@
 
         <div id="resultContainer" class="result-box hidden">
             <h4>업로드 완료!</h4>
+            <!-- [추가된 부분 시작] 임베딩 벡터 결과를 화면에 보여주기 위한 UI 박스 -->
+            <div id="embeddingContainer" class="hidden" style="margin-bottom: 15px;">
+                <strong>💡 AI 임베딩 벡터 추출 결과:</strong>
+                <pre id="embeddingResult" style="font-size: 12px; background: #eaf1ff; padding: 10px; max-height: 100px; overflow-y: auto; border: 1px solid #c2d5ff; border-radius: 4px;"></pre>
+            </div>
+            <!-- [추가된 부분 끝] -->
             <pre id="jsonResult" style="font-size: 12px; background: #eee; padding: 10px;"></pre>
             <p><strong>아래는 저장된 이미지 원본입니다:</strong></p>
             <img id="previewImage" src="" alt="Uploaded Image" />
@@ -219,6 +225,17 @@
                 
                 // 결과창 보여주기
                 document.getElementById('resultContainer').classList.remove('hidden');
+                
+                // [추가된 부분 시작] 백엔드에서 받은 응답(data) 중 embedding 값이 있으면, UI(embeddingContainer)에 출력
+                if (data.embedding && data.embedding.length > 0) {
+                    document.getElementById('embeddingContainer').classList.remove('hidden');
+                    document.getElementById('embeddingResult').innerText = JSON.stringify(data.embedding, null, 2);
+                } else {
+                    document.getElementById('embeddingContainer').classList.add('hidden');
+                }
+                // [추가된 부분 끝]
+
+                // 전체 JSON 결과 표시 (임베딩이 너무 길면 보기 불편할 수 있으므로, 복사본에서 임베딩 제거 후 표시 가능하지만 그대로 출력)
                 document.getElementById('jsonResult').innerText = JSON.stringify(data, null, 2);
                 
                 // imageToken(UUID)을 글로벌 변수에 저장 (삭제 시 사용)

@@ -52,3 +52,10 @@ jwt:
   secret: ${JWT_SECRET:c2ltaWxpYS1zZWNyZXQta2V5LXRlc3QtdmFsdWUtc2ltaWxpYS1zZWNyZXQta2V5LXRlc3QtdmFsdWU=}
   access-token-validity-in-milliseconds: 1800000   # 30분
   refresh-token-validity-in-milliseconds: 604800000  # 7일
+
+# ─────────────────────────────────────────────
+# AI 서버 설정
+# ─────────────────────────────────────────────
+ai:
+  server:
+    url: ${AI_SERVER_URL:http://localhost:8000}

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,10 @@ public class AiService {
 
     private final RestTemplate restTemplate;
 
+    // 파이썬 서버 주소를 동적으로 할당받기 위한 설정 (기본값: http://localhost:8000)
+    @Value("${ai.server.url:http://localhost:8000}")
+    private String aiServerUrl;
+
     public AiService() {
         this.restTemplate = new RestTemplate();
     }
@@ -30,7 +35,8 @@ public class AiService {
      * @return 임베딩 벡터 리스트 (실패 시 null 반환)
      */
     public List<Double> getImageEmbedding(MultipartFile file) {
-        String url = "http://localhost:8000/embed/image";
+        // 하드코딩된 주소 대신 주입받은 주소를 사용합니다.
+        String url = aiServerUrl + "/embed/image";
 
         try {
             HttpHeaders headers = new HttpHeaders();

@@ -28,7 +28,10 @@ public enum ErrorCode {
     IMAGE_UPLOAD_FAILED(500, "이미지 업로드 중 오류가 발생했습니다."),
 
     // 권한
-    ACCESS_DENIED(403, "해당 작업에 대한 권한이 없습니다.");
+    ACCESS_DENIED(403, "해당 작업에 대한 권한이 없습니다."),
+
+    // AI 통신
+    AI_SERVER_COMMUNICATION_FAILED(500, "AI 서버와의 통신 중 오류가 발생했습니다.");
 
     private final int code;
     private final String message;

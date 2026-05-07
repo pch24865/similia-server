@@ -60,12 +60,7 @@ public class ImageService {
 
         // [추가된 부분 시작] AI 서버와 통신하여 벡터 데이터 받아오기
         List<Double> embedding = aiService.getImageEmbedding(file);
-        if (embedding != null) {
-            log.info("AI 서버로부터 성공적으로 임베딩 값을 받아왔습니다. (벡터 크기: {})", embedding.size());
-            // System.out.println("전달받은 임베딩 벡터 값: " + embedding);
-        } else {
-            log.warn("AI 서버로부터 임베딩 값을 받아오지 못했습니다. 기존 DB 업로드 로직은 계속 진행합니다.");
-        }
+        log.info("AI 서버로부터 성공적으로 임베딩 값을 받아왔습니다. (벡터 크기: {})", embedding.size());
         // [추가된 부분 끝]
 
         try {

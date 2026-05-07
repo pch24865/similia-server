@@ -13,6 +13,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.noplay.similia.global.exception.BusinessException;
+import com.noplay.similia.global.exception.ErrorCode;
 import java.util.List;
 
 @Slf4j
@@ -68,10 +70,11 @@ public class AiService {
 
         } catch (Exception e) {
             log.error("AI 서버(FastAPI)와 통신 중 오류가 발생했습니다: {}", e.getMessage(), e);
-            // 메인 로직(이미지 업로드)에 영향을 주지 않도록 예외를 발생시키지 않고 null 반환
+            // global exception handler에서 처리되도록 커스텀 예외 발생
+            throw new BusinessException(ErrorCode.AI_SERVER_COMMUNICATION_FAILED);
         }
         
-        return null;
+        throw new BusinessException(ErrorCode.AI_SERVER_COMMUNICATION_FAILED);
     }
 
     // AI 서버의 JSON 응답 {"embedding": [0.012, 0.034, ...]}을 매핑하기 위한 내부 클래스

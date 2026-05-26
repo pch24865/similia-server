@@ -1,93 +1,40 @@
 # Similia
 
+## Spring boot, FastAPI + React-Native
 
+###### RestAPI 서버 : Springboot
+###### AI 및 임베딩 서버 : FastAPI
+###### 클라이언트 앱 : React-Native
+---
 
-## Getting started
+## 서비스 기획 배경
+- 한국관광공사의 국내여행 트렌드 조사에 따르면, 20~30대 응답자의 67%가 “SNS
+에 기록할 수 있는 감성적 장소”를 여행지 선정 기준으로 삼았다고 응답.
+- 방한 외국인 관광객들은 언어의 장벽으로 인해 텍스트 중심 관광지 탐색에 접근
+성이 현저히 낮음.
+- 여러개의 블로그 포스팅과 유튜브 영상에서 정보를 얻으면 결국 남들이 다 가는
+곳으로 수렴.
+- 국내 주요 여행 플랫폼에는 하루에도 수천 건의 여행 후기가 올라오며 콘텐츠
+소비 시간만 늘어날 뿐, 실제 의사결정에는 어려움을 겪는 결정 장애 유발.
+- 문화체육관광부와 한국관광공사의 분석에 따르면, 여행에서 보다 고유한 경험을
+하고자 하는 니즈에서 대중적으로 알려진 관광지 보다는 알려지지 않은 숨겨진
+관광지를 찾고자 하는 경향이 나타나고 있으며, 숨겨진 관광지 방문 관심 비율과
+언급량 증가 추세를 보임
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.com/pch24865/similia.git
-git branch -M main
-git push -uf origin main
-```
-
-## Integrate with your tools
-
-* [Set up project integrations](https://gitlab.com/pch24865/similia/-/settings/integrations)
-
-## Collaborate with your team
-
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## 기획 서비스 주요 기능
+- 이미지기반 관광 정보 검색 기능
+  - 이미지 업로드 또는 다른 사용자의 여행이미지의 특징을 분석하여 국내 유사
+관광지 매칭.
+  - 카테고리로 분류하여 여행지 및 지역 필터링 검색 기능.
+  - 날씨 및 운영시간에 따라 필터링 기능.
+- 취향을 분석하여 관광지 추천 기능
+  - 사용자 이미지 분석 카테고리별 분류와 사용자별 맞춤형 관광지 추천 기능.
+- 다른 여행객들과 사진 공유
+  - 공유하고 싶은 여행지 사진 공유 및 상호작용 기능.
+- AI기반 여행지 및 여행 경로 추천
+  - 사용자의 요구사항을 AI를 통해 답변과 여행 경로 추천 기능.
+- 다국어 관광 정보 제공 기능
+  - 앱 내 시스템 다국어 지원 및 관광지 정보 다국어 제공.
+- 무장애 관광정보 제공
+  - 기존 여행지 검색 및 추천시스템에 무장애 관광정보 추가 제공.
+  - 무장애 관광정보가 있는 관광지만 탐색하는 필터링 가능.

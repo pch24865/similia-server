@@ -7,21 +7,25 @@ import com.noplay.similia.image.domain.Image;
 import com.noplay.similia.image.infrastructure.ImageRepository;
 import com.noplay.similia.user.infrastructure.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * 이미지 관리를 담당하는 비즈니스 로직 서비스
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImageService {
 
     private final ImageRepository imageRepository;
     private final MemberRepository memberRepository;
+    private final AiService aiService;
 
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -54,6 +58,11 @@ public class ImageService {
             throw new BusinessException(ErrorCode.FILE_SIZE_EXCEEDED);
         }
 
+        // [추가된 부분 시작] AI 서버와 통신하여 벡터 데이터 받아오기
+        List<Double> embedding = aiService.getImageEmbedding(file);
+        log.info("AI 서버로부터 성공적으로 임베딩 값을 받아왔습니다. (벡터 크기: {})", embedding.size());
+        // [추가된 부분 끝]
+
         try {
             Image image = Image.builder()
                     .memberId(memberId)
@@ -64,32 +73,30 @@ public class ImageService {
                     .build();
 
             Image savedImage = imageRepository.save(image);
-            return ImageUploadResponseDto.from(savedImage);
+            // [수정된 부분] 기존에는 savedImage만 DTO로 변환했으나, 프론트엔드로 벡터값을 전달하기 위해 embedding도 함께 넘겨줌
+            return ImageUploadResponseDto.from(savedImage, embedding);
         } catch (IOException e) {
             throw new BusinessException(ErrorCode.IMAGE_UPLOAD_FAILED);
         }
     }
 
     @Transactional(readOnly = true)
-    public Image findById(Long imageId) {
-        return imageRepository.findById(imageId)
+    public Image findByToken(String imageToken) {
+        return imageRepository.findByImageToken(imageToken)
                 .orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND));
     }
 
     @Transactional
-    public void delete(Long memberId, Long imageId) {
+    public void delete(Long memberId, String imageToken) {
         if (memberId == null) {
             throw new BusinessException(ErrorCode.INVALID_MEMBER_ID);
         }
 
-        Image image = imageRepository.findById(imageId)
+        Image image = imageRepository.findByImageToken(imageToken)
                 .orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND));
 
         if (!image.getMemberId().equals(memberId)) {
-            // 다른 사람의 이미지를 삭제하려고 할 때 권한 없음(403 혹은 커스텀 에러) 대신 
-            // 현재는 간단히 NOT_FOUND 처리를 하거나, INVALID_INPUT_VALUE를 사용할 수 있습니다.
-            // 더 정확히 하려면 ErrorCode.ACCESS_DENIED 등을 만드는 것이 좋습니다.
-            throw new IllegalArgumentException("본인의 이미지만 삭제할 수 있습니다.");
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
         imageRepository.delete(image);

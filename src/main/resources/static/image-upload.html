@@ -160,6 +160,12 @@
 
         <div id="resultContainer" class="result-box hidden">
             <h4>업로드 완료!</h4>
+            <!-- [추가된 부분 시작] 임베딩 벡터 결과를 화면에 보여주기 위한 UI 박스 -->
+            <div id="embeddingContainer" class="hidden" style="margin-bottom: 15px;">
+                <strong>💡 AI 임베딩 벡터 추출 결과:</strong>
+                <pre id="embeddingResult" style="font-size: 12px; background: #eaf1ff; padding: 10px; max-height: 100px; overflow-y: auto; border: 1px solid #c2d5ff; border-radius: 4px;"></pre>
+            </div>
+            <!-- [추가된 부분 끝] -->
             <pre id="jsonResult" style="font-size: 12px; background: #eee; padding: 10px;"></pre>
             <p><strong>아래는 저장된 이미지 원본입니다:</strong></p>
             <img id="previewImage" src="" alt="Uploaded Image" />
@@ -183,7 +189,7 @@
         document.getElementById('logoutBtn').classList.remove('hidden');
     }
 
-    let currentUploadedImageId = null;
+    let currentUploadedImageToken = null; // UUID 기반 식별자 (data.id 대신 data.imageToken 사용)
 
     document.getElementById('uploadForm').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -219,14 +225,33 @@
                 
                 // 결과창 보여주기
                 document.getElementById('resultContainer').classList.remove('hidden');
+                
+                // [추가된 부분 시작] 백엔드에서 받은 응답(data) 중 embedding 값이 있으면, UI(embeddingContainer)에 출력
+                if (data.embedding && data.embedding.length > 0) {
+                    document.getElementById('embeddingContainer').classList.remove('hidden');
+                    document.getElementById('embeddingResult').innerText = JSON.stringify(data.embedding, null, 2);
+                } else {
+                    document.getElementById('embeddingContainer').classList.add('hidden');
+                }
+                // [추가된 부분 끝]
+
+                // 전체 JSON 결과 표시 (임베딩이 너무 길면 보기 불편할 수 있으므로, 복사본에서 임베딩 제거 후 표시 가능하지만 그대로 출력)
                 document.getElementById('jsonResult').innerText = JSON.stringify(data, null, 2);
                 
-                // 삭제 테스트를 위해 글로벌 변수에 저장
-                currentUploadedImageId = data.id;
+                // imageToken(UUID)을 글로벌 변수에 저장 (삭제 시 사용)
+                currentUploadedImageToken = data.imageToken;
 
-                // GET 조회 API를 이용해 방금 가져온 이미지를 img src에 곧바로 세팅 (인증 불필요하므로 그냥 세팅)
-                document.getElementById('previewImage').src = `/images/${data.id}`;
-                
+                // <img src="/images/..."> 방식은 JWT 헤더를 보낼 수 없어 인증 실패
+                // → fetch로 이미지 바이너리를 받아 Blob URL로 변환해서 표시
+                const imgResponse = await fetch(`/images/${data.imageToken}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (imgResponse.ok) {
+                    const blob = await imgResponse.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    document.getElementById('previewImage').src = blobUrl;
+                }
+
                 alert('업로드 성공!');
             } else {
                 const err = await response.json();
@@ -242,13 +267,14 @@
     });
 
     document.getElementById('deleteImageBtn').addEventListener('click', async function() {
-        if (!currentUploadedImageId) return;
+        if (!currentUploadedImageToken) return;
 
         const token = localStorage.getItem('accessToken');
         if (!confirm('정말 이 이미지를 삭제하시겠습니까? (삭제 API 테스트)')) return;
 
         try {
-            const response = await fetch('/images/' + currentUploadedImageId, {
+            // imageToken(UUID)으로 삭제 요청
+            const response = await fetch('/images/' + currentUploadedImageToken, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -257,10 +283,13 @@
 
             if (response.ok || response.status === 204) {
                 alert('이미지가 성공적으로 삭제되었습니다!');
-                // UI 원상 복구
+                // UI 원상 복구 및 Blob URL 메모리 해제
+                const previewImg = document.getElementById('previewImage');
+                if (previewImg.src.startsWith('blob:')) URL.revokeObjectURL(previewImg.src);
+                previewImg.src = '';
                 document.getElementById('resultContainer').classList.add('hidden');
                 document.getElementById('imageFile').value = '';
-                currentUploadedImageId = null;
+                currentUploadedImageToken = null;
             } else {
                 let errText = "삭제에 실패했습니다.";
                 try {

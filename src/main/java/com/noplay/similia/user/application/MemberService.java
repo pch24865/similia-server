@@ -35,16 +35,8 @@ public class MemberService {
         return MemberResponseDto.from(memberRepository.save(member));
     }
 
-    public MemberResponseDto login(LoginRequestDto dto) {
-        Member member = memberRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
-
-        if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
-            throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
-        }
-
-        return MemberResponseDto.from(member);
-    }
+    // [제거됨] login() 은 AuthService.login()에서 토큰 발급과 함께 처리합니다.
+    // MemberService에 동일한 메서드가 존재하면 혼란을 줄 수 있어 삭제합니다.
 
     public MemberResponseDto getMember(Long id) {
         Member member = memberRepository.findById(id)
@@ -81,8 +73,9 @@ public class MemberService {
 
     @Transactional
     public void deleteMember(Long id) {
+        // INVALID_INPUT_VALUE가 아닌 MEMBER_NOT_FOUND로 수정 - 존재하지 않는 회원 탈퇴 시도에 맞는 에러코드
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_INPUT_VALUE));
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
         memberRepository.delete(member);
     }

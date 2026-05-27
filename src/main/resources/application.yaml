@@ -12,3 +12,50 @@ spring:
 
 server:
   port: 8080
+
+# ─────────────────────────────────────────────
+# JWT 설정
+# ─────────────────────────────────────────────
+# [보안 주의] 아래 secret 값은 개발용 고정 키입니다.
+# 실제 배포 시에는 반드시 환경변수로 교체해야 합니다.
+# 토큰 서명 키가 노출되면 누구나 유효한 JWT를 위조할 수 있습니다.
+#
+# ── 배포 환경별 환경변수 설정 방법 ──────────────────
+#
+# [1] Linux 서버 직접 실행 시
+#     export JWT_SECRET=여기에_실제_시크릿_base64값
+#     java -jar similia.jar
+#
+# [2] Linux 서버 - 실행 시 인라인으로 넘기기
+#     JWT_SECRET=여기에_실제_시크릿_base64값 java -jar similia.jar
+#
+# [3] Docker 컨테이너 실행 시
+#     docker run -e JWT_SECRET=여기에_실제_시크릿_base64값 similia-app
+#
+# [4] docker-compose.yml 사용 시
+#     environment:
+#       - JWT_SECRET=여기에_실제_시크릿_base64값
+#
+# [5] GitHub Actions CI/CD (Secrets 등록 후)
+#     env:
+#       JWT_SECRET: ${{ secrets.JWT_SECRET }}
+#
+# [6] IntelliJ 로컬 Run/Debug Configuration
+#     Edit Configurations → Environment Variables →
+#     JWT_SECRET=여기에_실제_시크릿_base64값 추가
+#
+# ── yaml에서 환경변수를 읽는 방법 ─────────────────
+# secret: ${JWT_SECRET}                         ← 환경변수 없으면 오류 발생
+# secret: ${JWT_SECRET:기본값}                  ← 환경변수 없으면 기본값 사용
+# ─────────────────────────────────────────────
+jwt:
+  secret: ${JWT_SECRET:c2ltaWxpYS1zZWNyZXQta2V5LXRlc3QtdmFsdWUtc2ltaWxpYS1zZWNyZXQta2V5LXRlc3QtdmFsdWU=}
+  access-token-validity-in-milliseconds: 1800000   # 30분
+  refresh-token-validity-in-milliseconds: 604800000  # 7일
+
+# ─────────────────────────────────────────────
+# AI 서버 설정
+# ─────────────────────────────────────────────
+ai:
+  server:
+    url: ${AI_SERVER_URL:http://localhost:8000}

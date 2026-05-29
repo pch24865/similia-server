@@ -29,7 +29,13 @@ public enum ErrorCode {
 
     // 임베딩
     EMBEDDING_FAILED(500, "이미지 임베딩 처리 중 오류가 발생했습니다."),
-    EMBEDDING_NOT_FOUND(404, "해당 이미지의 임베딩 정보가 없습니다.");
+    EMBEDDING_NOT_FOUND(404, "해당 이미지의 임베딩 정보가 없습니다."),
+
+    // 권한
+    ACCESS_DENIED(403, "해당 작업에 대한 권한이 없습니다."),
+
+    // AI 통신
+    AI_SERVER_COMMUNICATION_FAILED(500, "AI 서버와의 통신 중 오류가 발생했습니다.");
 
     private final int code;
     private final String message;

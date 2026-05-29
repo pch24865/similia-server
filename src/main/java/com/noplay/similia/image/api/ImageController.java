@@ -1,5 +1,7 @@
 package com.noplay.similia.image.api;
 
+import com.noplay.similia.global.exception.BusinessException;
+import com.noplay.similia.global.exception.ErrorCode;
 import com.noplay.similia.image.api.dto.ImageUploadResponseDto;
 import com.noplay.similia.image.application.ImageService;
 import com.noplay.similia.image.domain.Image;
@@ -70,16 +72,17 @@ public class ImageController {
      * 이미지 원본 조회 API
      * 
      * [요청 형식]
-     * - Method: GET /images/{imageId}
-     * - Parameter: imageId (Long) - 업로드 시 발급받은 이미지 ID
+     * - Method: GET /images/{imageToken}
+     * - Parameter: imageToken (UUID) - 업로드 시 발급받은 이미지 토큰
+     * - JWT 토큰 필수 (Authorization 헤더)
      * 
      * [응답 형식]
      * - 웹 브라우저나 img 태그의 src 속성에 직접 사용 가능 (바이너리 데이터를 그대로 반환)
      * - Status: 200 OK
      */
-    @GetMapping("/{imageId}")
-    public ResponseEntity<byte[]> getImage(@PathVariable("imageId") Long imageId) {
-        Image image = imageService.findById(imageId);
+    @GetMapping("/{imageToken}")
+    public ResponseEntity<byte[]> getImage(@PathVariable("imageToken") String imageToken) {
+        Image image = imageService.findByToken(imageToken);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(image.getContentType()));
@@ -93,25 +96,30 @@ public class ImageController {
      * 이미지 삭제 API
      * 
      * [요청 형식]
-     * - Method: DELETE /images/{imageId}
+     * - Method: DELETE /images/{imageToken}
      * - JWT 토큰 필수 (Authorization 헤더)
      * 
      * [응답 형식]
      * - Status: 204 No Content (성공적으로 삭제됨, Body 없음)
      */
-    @DeleteMapping("/{imageId}")
+    @DeleteMapping("/{imageToken}")
     public ResponseEntity<Void> deleteImage(
-            @PathVariable("imageId") Long imageId,
+            @PathVariable("imageToken") String imageToken,
             @AuthenticationPrincipal String tokenMemberId) {
         
         Long memberId = parseMemberId(tokenMemberId);
-        imageService.delete(memberId, imageId);
+        imageService.delete(memberId, imageToken);
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * JWT에서 추출한 memberId(String)를 Long으로 변환합니다.
+     * - null이면 JWT가 없거나 만료된 것이므로 401(INVALID_TOKEN) 반환
+     * - BusinessException을 통해 GlobalExceptionHandler가 일관된 에러 형식으로 처리합니다.
+     */
     private Long parseMemberId(String memberId) {
         if (memberId == null) {
-            throw new IllegalArgumentException("로그인이 필요합니다.");
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
         return Long.parseLong(memberId);
     }

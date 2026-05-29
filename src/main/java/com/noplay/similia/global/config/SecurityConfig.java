@@ -45,8 +45,7 @@ public class SecurityConfig {
                                 .requestMatchers("/h2-console/**").permitAll()
                                 // API 중 모두에게 열어둘 경로
                                 .requestMatchers("/members", "/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                                // 이미지는 누구나 '조회' 가능 (HTML 등에서 보여주기 위해)
-                                .requestMatchers(org.springframework.http.HttpMethod.GET, "/images/**").permitAll()
+                                // 이미지 포함 나머지 모든 요청은 JWT 인증 필요
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)

@@ -3,12 +3,16 @@ package com.noplay.similia.image.api;
 import com.noplay.similia.image.api.dto.ImageUploadResponseDto;
 import com.noplay.similia.image.application.ImageService;
 import com.noplay.similia.image.domain.Image;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
  * - 모든 업로드는 multipart/form-data 형식으로 요청해야 합니다.
  * - 추천용 이미지만을 다루며, 실제 AI 분석 요청은 별도의 API에서 진행됩니다.
  */
+@Slf4j
 @Tag(name = "Image", description = "이미지 업로드")
 @RestController
 @RequestMapping("/images")
@@ -41,11 +46,21 @@ public class ImageController {
      * - Status: 201 Created
      * - Body: ImageUploadResponseDto (업로드된 이미지의 id, 생성일 등)
      */
+    @Operation(summary = "내 이미지 목록 조회", description = "로그인한 유저가 업로드한 이미지 목록을 최신순으로 반환합니다.")
+    @GetMapping
+    public ResponseEntity<List<ImageUploadResponseDto>> getMyImages(
+            @AuthenticationPrincipal String tokenMemberId) {
+
+        Long memberId = parseMemberId(tokenMemberId);
+        return ResponseEntity.ok(imageService.findAllByMember(memberId));
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImageUploadResponseDto> uploadImage(
             @AuthenticationPrincipal String tokenMemberId,
             @RequestParam("file") MultipartFile file) {
 
+        log.info("이미지 업로드 요청 도착 - memberId: {}, file: {}", tokenMemberId, file != null ? file.getOriginalFilename() : "null");
         Long memberId = parseMemberId(tokenMemberId);
         ImageUploadResponseDto responseDto = imageService.upload(memberId, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);

@@ -12,10 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
-/**
- * 이미지 관리를 담당하는 비즈니스 로직 서비스
- */
 @Service
 @RequiredArgsConstructor
 public class ImageService {
@@ -23,14 +21,8 @@ public class ImageService {
     private final ImageRepository imageRepository;
     private final MemberRepository memberRepository;
 
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-    /**
-     * 프론트엔드에서 전달받은 이미지 파일을 DB(BYTEA)에 저장합니다.
-     * @param memberId 회원 ID (유효성 검사 진행)
-     * @param file 업로드된 이미지 파일 (용량, 타입 검사 진행)
-     * @return 저장 완료된 이미지 정보 DTO
-     */
     @Transactional
     public ImageUploadResponseDto upload(Long memberId, MultipartFile file) {
         if (memberId == null) {
@@ -65,9 +57,19 @@ public class ImageService {
 
             Image savedImage = imageRepository.save(image);
             return ImageUploadResponseDto.from(savedImage);
+        } catch (BusinessException e) {
+            throw e;
         } catch (IOException e) {
             throw new BusinessException(ErrorCode.IMAGE_UPLOAD_FAILED);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<ImageUploadResponseDto> findAllByMember(Long memberId) {
+        return imageRepository.findByMemberIdOrderByCreatedAtDesc(memberId)
+                .stream()
+                .map(ImageUploadResponseDto::from)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -86,9 +88,6 @@ public class ImageService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND));
 
         if (!image.getMemberId().equals(memberId)) {
-            // 다른 사람의 이미지를 삭제하려고 할 때 권한 없음(403 혹은 커스텀 에러) 대신 
-            // 현재는 간단히 NOT_FOUND 처리를 하거나, INVALID_INPUT_VALUE를 사용할 수 있습니다.
-            // 더 정확히 하려면 ErrorCode.ACCESS_DENIED 등을 만드는 것이 좋습니다.
             throw new IllegalArgumentException("본인의 이미지만 삭제할 수 있습니다.");
         }
 

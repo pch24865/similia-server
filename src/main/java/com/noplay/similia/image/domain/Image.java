@@ -30,6 +30,7 @@ public class Image {
     @Column(name = "file_size", nullable = false)
     private Long fileSize;
 
+    @Lob
     @Column(name = "image_data", nullable = false)
     private byte[] data;
 

@@ -1,7 +1,10 @@
 package com.noplay.similia.core.config;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,10 +13,19 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI openAPI() {
+        SecurityScheme bearerAuth = new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT")
+                .in(SecurityScheme.In.HEADER)
+                .name("Authorization");
+
         return new OpenAPI()
                 .info(new Info()
-                        .title("Similia API Documentation")
-                        .description("Similia 회원 및 세션 API 문서")
-                        .version("1.0.0"));
+                        .title("Similia API")
+                        .description("Similia 여행지 추천 서비스 API 문서")
+                        .version("1.0.0"))
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                .components(new Components().addSecuritySchemes("bearerAuth", bearerAuth));
     }
 }

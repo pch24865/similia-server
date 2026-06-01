@@ -27,8 +27,7 @@ public class EmbeddingClient {
             EmbeddingResponse response = restTemplate.postForObject(
                     "http://localhost:3001/embed/text",
                     entity,
-                    EmbeddingResponse.class
-            );
+                    EmbeddingResponse.class);
             if (response == null || response.getEmbedding() == null) {
                 throw new BusinessException(ErrorCode.EMBEDDING_FAILED);
             }
@@ -63,8 +62,7 @@ public class EmbeddingClient {
             EmbeddingResponse response = restTemplate.postForObject(
                     "http://localhost:3001/embed/image",
                     body,
-                    EmbeddingResponse.class
-            );
+                    EmbeddingResponse.class);
 
             if (response == null || response.getEmbedding() == null) {
                 throw new BusinessException(ErrorCode.EMBEDDING_FAILED);

@@ -3,6 +3,7 @@ package com.noplay.similia.image.infrastructure.client;
 import com.noplay.similia.global.exception.BusinessException;
 import com.noplay.similia.global.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +19,9 @@ public class EmbeddingClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    @Value("${ai.server.url:http://localhost:3001}")
+    private String aiServerUrl;
+
     public double[] embedText(String text) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -25,7 +29,7 @@ public class EmbeddingClient {
 
         try {
             EmbeddingResponse response = restTemplate.postForObject(
-                    "http://localhost:3001/embed/text",
+                    aiServerUrl + "/embed/text",
                     entity,
                     EmbeddingResponse.class);
             if (response == null || response.getEmbedding() == null) {
@@ -60,7 +64,7 @@ public class EmbeddingClient {
 
         try {
             EmbeddingResponse response = restTemplate.postForObject(
-                    "http://localhost:3001/embed/image",
+                    aiServerUrl + "/embed/image",
                     body,
                     EmbeddingResponse.class);
 

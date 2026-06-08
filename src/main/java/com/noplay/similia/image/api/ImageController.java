@@ -2,6 +2,7 @@ package com.noplay.similia.image.api;
 
 import com.noplay.similia.global.exception.BusinessException;
 import com.noplay.similia.global.exception.ErrorCode;
+import com.noplay.similia.global.security.CustomUserDetails;
 import com.noplay.similia.image.api.dto.ImageUploadResponseDto;
 import com.noplay.similia.image.application.ImageService;
 import com.noplay.similia.image.domain.Image;
@@ -51,19 +52,19 @@ public class ImageController {
     @Operation(summary = "내 이미지 목록 조회", description = "로그인한 유저가 업로드한 이미지 목록을 최신순으로 반환합니다.")
     @GetMapping
     public ResponseEntity<List<ImageUploadResponseDto>> getMyImages(
-            @AuthenticationPrincipal String tokenMemberId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        Long memberId = parseMemberId(tokenMemberId);
+        Long memberId = getMemberId(userDetails);
         return ResponseEntity.ok(imageService.findAllByMember(memberId));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImageUploadResponseDto> uploadImage(
-            @AuthenticationPrincipal String tokenMemberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam("file") MultipartFile file) {
 
-        log.info("이미지 업로드 요청 도착 - memberId: {}, file: {}", tokenMemberId, file != null ? file.getOriginalFilename() : "null");
-        Long memberId = parseMemberId(tokenMemberId);
+        Long memberId = getMemberId(userDetails);
+        log.info("이미지 업로드 요청 도착 - memberId: {}, file: {}", memberId, file != null ? file.getOriginalFilename() : "null");
         ImageUploadResponseDto responseDto = imageService.upload(memberId, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
@@ -105,22 +106,17 @@ public class ImageController {
     @DeleteMapping("/{imageToken}")
     public ResponseEntity<Void> deleteImage(
             @PathVariable("imageToken") String imageToken,
-            @AuthenticationPrincipal String tokenMemberId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         
-        Long memberId = parseMemberId(tokenMemberId);
+        Long memberId = getMemberId(userDetails);
         imageService.delete(memberId, imageToken);
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * JWT에서 추출한 memberId(String)를 Long으로 변환합니다.
-     * - null이면 JWT가 없거나 만료된 것이므로 401(INVALID_TOKEN) 반환
-     * - BusinessException을 통해 GlobalExceptionHandler가 일관된 에러 형식으로 처리합니다.
-     */
-    private Long parseMemberId(String memberId) {
-        if (memberId == null) {
+    private Long getMemberId(CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getMember() == null) {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
-        return Long.parseLong(memberId);
+        return userDetails.getMember().getId();
     }
 }

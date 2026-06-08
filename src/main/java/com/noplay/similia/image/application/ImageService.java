@@ -4,7 +4,10 @@ import com.noplay.similia.global.exception.BusinessException;
 import com.noplay.similia.global.exception.ErrorCode;
 import com.noplay.similia.image.api.dto.ImageUploadResponseDto;
 import com.noplay.similia.image.domain.Image;
+import com.noplay.similia.image.domain.ImageEmbedding;
+import com.noplay.similia.image.infrastructure.ImageEmbeddingRepository;
 import com.noplay.similia.image.infrastructure.ImageRepository;
+import com.noplay.similia.image.infrastructure.client.EmbeddingClient;
 import com.noplay.similia.user.infrastructure.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,8 @@ public class ImageService {
 
     private final ImageRepository imageRepository;
     private final MemberRepository memberRepository;
+    private final ImageEmbeddingRepository imageEmbeddingRepository;
+    private final EmbeddingClient embeddingClient;
 
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -94,9 +99,30 @@ public class ImageService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND));
 
         if (!image.getMemberId().equals(memberId)) {
-            throw new IllegalArgumentException("본인의 이미지만 삭제할 수 있습니다.");
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
         imageRepository.delete(image);
+    }
+
+    @Transactional
+    public double[] getImageEmbedding(Long imageId) {
+        ImageEmbedding imageEmbedding = imageEmbeddingRepository.findByImageId(imageId)
+                .orElseGet(() -> {
+                    Image image = imageRepository.findById(imageId)
+                            .orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND));
+                    double[] embedding = embeddingClient.embedImage(
+                            image.getData(), image.getOriginalName(), image.getContentType());
+                    return imageEmbeddingRepository.save(
+                            ImageEmbedding.builder()
+                                    .imageId(imageId)
+                                    .embedding(embedding)
+                                    .build());
+                });
+        return imageEmbedding.getEmbedding();
+    }
+
+    public double[] getTextEmbedding(String text) {
+        return embeddingClient.embedText(text);
     }
 }

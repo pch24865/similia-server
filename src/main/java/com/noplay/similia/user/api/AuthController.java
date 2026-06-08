@@ -2,6 +2,7 @@ package com.noplay.similia.user.api;
 
 import com.noplay.similia.global.exception.BusinessException;
 import com.noplay.similia.global.exception.ErrorCode;
+import com.noplay.similia.global.security.CustomUserDetails;
 import com.noplay.similia.user.api.dto.LoginRequestDto;
 import com.noplay.similia.user.api.dto.TokenResponseDto;
 import com.noplay.similia.user.application.AuthService;
@@ -71,11 +72,11 @@ public class AuthController {
     // 토큰 삭제 = 로그아웃
     @DeleteMapping
     public ResponseEntity<Void> deleteToken(
-            @AuthenticationPrincipal String memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletResponse response
     ) {
-        if (memberId != null) {
-            authService.logout(Long.parseLong(memberId));
+        if (userDetails != null && userDetails.getMember() != null) {
+            authService.logout(userDetails.getMember().getId());
         }
 
         // [Refresh Token 위치]: 저장되어 있던 쿠키(Cookie)의 수명을 0으로 만들어 삭제를 유도합니다.

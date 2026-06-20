@@ -43,11 +43,8 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                // 정적 파일 및 뷰 페이지 허용
-                                .requestMatchers("/", "/*.html", "/css/**", "/js/**", "/favicon.ico", "/error").permitAll()
-                                // H2 콘솔 허용
-                                .requestMatchers("/h2-console/**").permitAll()
                                 // API 중 모두에게 열어둘 경로
+                                .requestMatchers("/", "/error").permitAll()
                                 .requestMatchers("/members", "/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 // 이미지 포함 나머지 모든 요청은 JWT 인증 필요
                                 .anyRequest().authenticated()

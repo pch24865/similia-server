@@ -3,6 +3,7 @@ package com.noplay.similia.global.config;
 import com.noplay.similia.global.security.JwtAuthenticationFilter;
 import com.noplay.similia.global.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +25,9 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
+
+    @Value("${cors.allowed-origins:*}")
+    private List<String> allowedOrigins;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -69,8 +73,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Expo 테스트를 위해 모든 도메인 허용 (실제 배포 시에는 특정 도메인만 지정하는 게 좋아)
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOriginPatterns(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true); // 쿠키나 인증 헤더 허용

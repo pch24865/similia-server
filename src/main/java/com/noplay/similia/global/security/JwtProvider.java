@@ -7,28 +7,37 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Collections;
 import java.util.Date;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class JwtProvider {
 
     private final Key key;
     private final long accessTokenValidityTime;
     private final long refreshTokenValidityTime;
+    private final CustomUserDetailsService customUserDetailsService;
 
     public JwtProvider(
             @Value("${jwt.secret:c2ltaWxpYS1zZWNyZXQta2V5LXRlc3QtdmFsdWUtc2ltaWxpYS1zZWNyZXQta2V5LXRlc3QtdmFsdWU=}") String secretKey,
             @Value("${jwt.access-token-validity-in-milliseconds:1800000}") long accessTokenValidityTime, // 30 minutes
-            @Value("${jwt.refresh-token-validity-in-milliseconds:604800000}") long refreshTokenValidityTime) { // 7 days
+            @Value("${jwt.refresh-token-validity-in-milliseconds:604800000}") long refreshTokenValidityTime, // 7 days
+            CustomUserDetailsService customUserDetailsService) { 
         byte[] keyBytes = io.jsonwebtoken.io.Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.accessTokenValidityTime = accessTokenValidityTime;
         this.refreshTokenValidityTime = refreshTokenValidityTime;
+        this.customUserDetailsService = customUserDetailsService;
     }
 
     public String createAccessToken(Long memberId) {
@@ -59,18 +68,24 @@ public class JwtProvider {
                 .getBody();
 
         String memberId = claims.getSubject();
-        // 실제 운영에서는 UserDetailsService를 통해 Member 엔티티를 로드하여 UserDetails 객체를 만드는 것이 정석이나,
-        // 성능과 편의를 위해 memberId 자체를 Principal로 사용합니다.
-        return new UsernamePasswordAuthenticationToken(memberId, token, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+        
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(memberId);
+        return new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());
     }
 
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-        } catch (Exception e) {
-            // 이외의 예외: 만료, 잘못된 서명 등 처리 (실제로는 더 세밀한 예외 처리가 필요함)
-            return false;
+        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            log.warn("잘못된 JWT 서명입니다: {}", e.getMessage());
+        } catch (ExpiredJwtException e) {
+            log.warn("만료된 JWT 토큰입니다: {}", e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            log.warn("지원되지 않는 JWT 토큰입니다: {}", e.getMessage());
+        } catch (IllegalArgumentException e) {
+            log.warn("JWT 토큰이 잘못되었습니다: {}", e.getMessage());
         }
+        return false;
     }
 }

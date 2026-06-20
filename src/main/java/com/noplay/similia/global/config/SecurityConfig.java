@@ -53,7 +53,12 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, ex) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write("{\"message\":\"로그인이 만료되었습니다. 다시 로그인해주세요.\"}");
+                            response.getWriter().write("{\"code\":401,\"message\":\"로그인이 만료되었습니다. 다시 로그인해주세요.\"}");
+                        })
+                        .accessDeniedHandler((request, response, ex) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"code\":403,\"message\":\"해당 작업에 대한 권한이 없습니다.\"}");
                         })
                 );
 

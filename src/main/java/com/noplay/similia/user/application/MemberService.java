@@ -6,7 +6,7 @@ import com.noplay.similia.user.domain.Member;
 import com.noplay.similia.user.infrastructure.MemberRepository;
 import com.noplay.similia.user.api.dto.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public MemberResponseDto signUp(SignUpRequestDto dto) {

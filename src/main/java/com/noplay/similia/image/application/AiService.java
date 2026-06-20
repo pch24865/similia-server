@@ -17,10 +17,11 @@ import com.noplay.similia.global.exception.BusinessException;
 import com.noplay.similia.global.exception.ErrorCode;
 import java.util.List;
 
+@Deprecated
 @Slf4j
 @Service
 public class AiService {
-
+    // @deprecated place_recommend 패키지로 따로 분리되어 사용되지 않음
     private final RestTemplate restTemplate;
 
     // 파이썬 서버 주소를 동적으로 할당받기 위한 설정 (기본값: http://localhost:8000)

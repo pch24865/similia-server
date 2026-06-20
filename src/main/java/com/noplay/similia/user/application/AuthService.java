@@ -76,11 +76,17 @@ public class AuthService {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
 
-        // 4. 새로운 토큰 생성
+        // 4. DB에 저장된 만료 시간 검증
+        if (refreshToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            refreshTokenRepository.delete(refreshToken);
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+        }
+
+        // 5. 새로운 토큰 생성
         String newAccessToken = jwtProvider.createAccessToken(memberId);
         String newRefreshTokenString = jwtProvider.createRefreshToken(memberId);
 
-        // 5. DB 업데이트
+        // 6. DB 업데이트
         LocalDateTime expiryDate = LocalDateTime.now().plusDays(7);
         refreshToken.updateToken(newRefreshTokenString, expiryDate);
 

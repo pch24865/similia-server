@@ -2,6 +2,7 @@ package com.noplay.similia.user.api;
 
 import com.noplay.similia.global.exception.BusinessException;
 import com.noplay.similia.global.exception.ErrorCode;
+import com.noplay.similia.global.security.CustomUserDetails;
 import com.noplay.similia.user.api.dto.LoginRequestDto;
 import com.noplay.similia.user.api.dto.TokenResponseDto;
 import com.noplay.similia.user.application.AuthService;
@@ -31,7 +32,7 @@ public class AuthController {
     ) {
         TokenResponseDto tokenDto = authService.login(dto);
 
-        // 보안을 위해 Refresh Token은 HttpOnly 쿠키에 담아서 전달
+        // [Refresh Token 위치]: 클라이언트가 직접 접근할 수 없도록 HttpOnly 속성의 쿠키(Cookie)에 담겨 전달됩니다.
         Cookie refreshTokenCookie = new Cookie("refresh_token", tokenDto.getRefreshToken());
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setSecure(true); // HTTPS 적용 시 활성화
@@ -47,6 +48,7 @@ public class AuthController {
     // 토큰 갱신 = 토큰 재발급
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponseDto> refreshToken(
+            // [Refresh Token 위치]: 클라이언트의 요청 헤더 내 쿠키(Cookie)에서 자동으로 추출됩니다.
             @CookieValue(value = "refresh_token", required = false) String refreshToken,
             HttpServletResponse response
     ) {
@@ -70,14 +72,14 @@ public class AuthController {
     // 토큰 삭제 = 로그아웃
     @DeleteMapping
     public ResponseEntity<Void> deleteToken(
-            @AuthenticationPrincipal String memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletResponse response
     ) {
-        if (memberId != null) {
-            authService.logout(Long.parseLong(memberId));
+        if (userDetails != null && userDetails.getMember() != null) {
+            authService.logout(userDetails.getMember().getId());
         }
 
-        // 쿠키 삭제 (수명을 0으로 만듦)
+        // [Refresh Token 위치]: 저장되어 있던 쿠키(Cookie)의 수명을 0으로 만들어 삭제를 유도합니다.
         Cookie refreshTokenCookie = new Cookie("refresh_token", null);
         refreshTokenCookie.setMaxAge(0);
         refreshTokenCookie.setPath("/");

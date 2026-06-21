@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    # 운영 환경용 RDS 정보 (환경변수 주입)
+    url: ${PROD_DB_URL:${DB_URL}}
+    username: ${PROD_DB_USERNAME:${DB_USERNAME}}
+    password: ${PROD_DB_PASSWORD:${DB_PASSWORD}}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate # 운영 환경에서는 데이터 손실을 막기 위해 철저히 validate
+    show-sql: false # 성능을 위해 쿼리 로깅 끄기
+    properties:
+      hibernate:
+        format_sql: false
+
+logging:
+  level:
+    root: INFO
+    com.noplay.similia: INFO

@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Collections;
 import java.util.Date;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -32,7 +31,7 @@ public class JwtProvider {
             @Value("${jwt.secret:c2ltaWxpYS1zZWNyZXQta2V5LXRlc3QtdmFsdWUtc2ltaWxpYS1zZWNyZXQta2V5LXRlc3QtdmFsdWU=}") String secretKey,
             @Value("${jwt.access-token-validity-in-milliseconds:1800000}") long accessTokenValidityTime, // 30 minutes
             @Value("${jwt.refresh-token-validity-in-milliseconds:604800000}") long refreshTokenValidityTime, // 7 days
-            CustomUserDetailsService customUserDetailsService) { 
+            CustomUserDetailsService customUserDetailsService) {
         byte[] keyBytes = io.jsonwebtoken.io.Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.accessTokenValidityTime = accessTokenValidityTime;
@@ -68,7 +67,7 @@ public class JwtProvider {
                 .getBody();
 
         String memberId = claims.getSubject();
-        
+
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(memberId);
         return new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());
     }

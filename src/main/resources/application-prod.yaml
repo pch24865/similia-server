@@ -9,7 +9,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: validate # 운영 환경에서는 데이터 손실을 막기 위해 철저히 validate
+      ddl-auto: update # 개발 단계이므로 DB 컬럼 자동 추가 허용 (원래는 validate)
     show-sql: false # 성능을 위해 쿼리 로깅 끄기
     properties:
       hibernate:

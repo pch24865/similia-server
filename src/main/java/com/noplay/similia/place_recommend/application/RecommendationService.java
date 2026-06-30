@@ -16,8 +16,8 @@ public class RecommendationService {
     private final PlaceRecommendRepository placeRecommendRepository;
     private final ImageService imageService;
 
-    public List<RecommendationResponseDto> recommendByImage(Long imageId, int limit) {
-        double[] embedding = imageService.getImageEmbedding(imageId);
+    public List<RecommendationResponseDto> recommendByImage(String imageToken, int limit) {
+        double[] embedding = imageService.getImageEmbeddingByToken(imageToken);
 
         return placeRecommendRepository
                 .findSimilarByImageVector(embedding, limit)

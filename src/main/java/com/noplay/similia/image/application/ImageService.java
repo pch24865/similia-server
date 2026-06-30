@@ -122,6 +122,12 @@ public class ImageService {
         return imageEmbedding.getEmbedding();
     }
 
+    @Transactional
+    public double[] getImageEmbeddingByToken(String imageToken) {
+        Image image = findByToken(imageToken);
+        return getImageEmbedding(image.getId());
+    }
+
     public double[] getTextEmbedding(String text) {
         return embeddingClient.embedText(text);
     }
